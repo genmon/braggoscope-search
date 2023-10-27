@@ -1,0 +1,37 @@
+{
+  "name": "backend",
+  "private": true,
+  "description": "🎈 PartyKit ⤫ Remix 💿",
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "build": "rimraf build && rimraf public/build && remix build",
+    "deploy": "npm run build && partykit deploy",
+    "dev": "remix dev --manual -c \"npm start\" --port 8002",
+    "start": "partykit dev"
+  },
+  "dependencies": {
+    "@remix-run/css-bundle": "^2.1.0",
+    "@remix-run/react": "^2.1.0",
+    "isbot": "^3.7.0",
+    "partymix": "^0.0.5",
+    "partysocket": "0.0.12",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.1.0",
+    "@remix-run/eslint-config": "^2.1.0",
+    "@types/react": "^18.2.29",
+    "@types/react-dom": "^18.2.14",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.51.0",
+    "partykit": "^0.0.32",
+    "rimraf": "^5.0.5",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=18.17.1"
+  }
+}
