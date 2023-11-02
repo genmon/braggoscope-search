@@ -1,5 +1,5 @@
-import { clear } from "isbot";
 import type * as Party from "partykit/server";
+import { getEpisodes, upsertEmbedding } from "./utils/indexer";
 
 export const SEARCH_SINGLETON_ROOM_ID = "braggoscope";
 
@@ -14,20 +14,38 @@ export default class SearchServer implements Party.Server {
     const message = JSON.parse(msg);
 
     if (message.type === "init") {
-      this.interval = setInterval(() => {
-        this.progress += 1;
-        if (this.progress >= this.target) {
-          this.progress = 0;
-          clearInterval(this.interval!);
-          connection.send(JSON.stringify({ type: "done" }));
-        }
-        connection.send(
-          JSON.stringify({
-            type: "progress",
-            progress: this.progress,
-          })
-        );
-      }, 50);
+      await this.buildIndex();
     }
+  }
+
+  broadcastProgress() {
+    console.log("broadcasting progress", this.progress, this.target);
+    this.party.broadcast(
+      JSON.stringify({
+        type: "progress",
+        target: this.target,
+        progress: this.progress,
+      })
+    );
+  }
+
+  async buildIndex() {
+    const episodes = await getEpisodes();
+    this.target = episodes.length;
+    this.progress = 0;
+    this.broadcastProgress();
+
+    for (const episode of episodes) {
+      //const { id, title, published, permalink, description } = episode;
+      await upsertEmbedding({ ...episode, env: this.party.env });
+      this.progress += 1;
+      this.broadcastProgress();
+    }
+
+    this.party.broadcast(
+      JSON.stringify({
+        type: "done",
+      })
+    );
   }
 }

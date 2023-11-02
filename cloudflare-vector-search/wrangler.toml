@@ -2,6 +2,13 @@ name = "cloudflare-vector-search"
 main = "src/index.ts"
 compatibility_date = "2023-10-25"
 
+[ai]
+binding = "AI"
+
+[[vectorize]]
+binding = "VECTOR_INDEX"
+index_name = "braggoscope-index"
+
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables
