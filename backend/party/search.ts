@@ -1,5 +1,9 @@
 import type * as Party from "partykit/server";
-import { getEpisodes, upsertEmbedding } from "./utils/indexer";
+import {
+  getEpisodes,
+  upsertEmbedding,
+  searchEmbeddings,
+} from "./utils/indexer";
 
 export const SEARCH_SINGLETON_ROOM_ID = "braggoscope";
 
@@ -47,5 +51,28 @@ export default class SearchServer implements Party.Server {
         type: "done",
       })
     );
+  }
+
+  async onRequest(req: Party.Request) {
+    if (this.party.id !== SEARCH_SINGLETON_ROOM_ID) {
+      return new Response("Not Found", { status: 404 });
+    }
+
+    if (req.method === "POST") {
+      const { query } = (await req.json()) as any;
+      const episodes = await searchEmbeddings({ env: this.party.env, query });
+      const dummyEpisodes = [
+        {
+          id: "123",
+          title: "Title: " + query,
+          published: "2023-01-01",
+          permalink: "TK",
+          score: 0.5,
+        },
+      ];
+      return new Response(JSON.stringify({ episodes: dummyEpisodes }));
+    }
+
+    return new Response("Method Not Allowed", { status: 405 });
   }
 }

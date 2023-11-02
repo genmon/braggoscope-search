@@ -32,3 +32,17 @@ export async function upsertEmbedding(params: {
     }),
   });
 }
+
+export async function searchEmbeddings(params: {
+  env: Record<string, any>;
+  query: string;
+}) {
+  const res = await fetch(new URL(params.env.CLOUDFLARE_VECTORIZE_URL), {
+    method: "POST",
+    body: JSON.stringify({
+      query: params.query,
+    }),
+  });
+  const { matches } = await res.json();
+  return matches;
+}
