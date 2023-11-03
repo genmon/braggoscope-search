@@ -50,18 +50,22 @@ export default function SearchResults(props: {
   return (
     <div className="flex flex-col justify-start items-start gap-1">
       <div className="font-semibold">Episodes</div>
-      <ul className="flex flex-col justify-start items-start gap-1">
-        {episodes.map((episode) => (
-          <li key={episode.id}>
-            <a
-              className="text-blue-500 hover:text-blue-700"
-              href={`https://www.braggoscope.com${episode.permalink}`}
-            >
-              {episode.title}
-            </a>{" "}
-            (score: {episode.score})
-          </li>
-        ))}
+      <ul className="flex flex-col justify-start items-start gap-2">
+        {episodes.map((episode) => {
+          return (
+            <li key={episode.id}>
+              <a
+                className="text-blue-500 hover:text-blue-700"
+                href={`https://www.braggoscope.com${episode.permalink}`}
+              >
+                {episode.title}
+              </a>{" "}
+              <span className="text-gray-400 text-xs">
+                {episode.published}. Score: {episode.score}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
