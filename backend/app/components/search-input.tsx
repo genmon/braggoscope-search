@@ -16,7 +16,7 @@ export default function SearchInput(props: {
       className="flex justify-start items-center gap-2"
     >
       <input
-        className="border border-gray-300 rounded-sm px-2 py-2"
+        className="border border-gray-300 rounded-sm px-2 py-2 w-80"
         type="text"
         value={query}
         onChange={(event) => setQuery(event.target.value)}

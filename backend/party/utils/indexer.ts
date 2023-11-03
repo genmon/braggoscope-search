@@ -44,5 +44,5 @@ export async function searchEmbeddings(params: {
     }),
   });
   const { matches } = await res.json();
-  return matches;
+  return matches ?? [];
 }

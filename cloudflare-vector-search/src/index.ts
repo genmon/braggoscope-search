@@ -60,7 +60,7 @@ app.post('/', async (c: Context) => {
 
 	// Query the database. `returnVectors: true` means we get metadata too
 	// This is not scoped to the guildId
-	const nearest = await c.env.VECTOR_INDEX.query(values, { topK: 5, returnVectors: true });
+	const nearest = await c.env.VECTOR_INDEX.query(values, { topK: 15, returnVectors: true });
 
 	const found: { id: string; title: string; published: string; permalink: string; score: number }[] = [];
 
@@ -72,8 +72,8 @@ app.post('/', async (c: Context) => {
 		});
 	}
 
-	// Return maximum 5 results
-	return c.json({ matches: found.slice(0, 5) });
+	// Return maximum 15 results
+	return c.json({ matches: found.slice(0, 15) });
 });
 
 /*

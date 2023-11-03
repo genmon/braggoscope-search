@@ -70,7 +70,7 @@ export default class SearchServer implements Party.Server {
           score: 0.5,
         },
       ];
-      return new Response(JSON.stringify({ episodes: dummyEpisodes }));
+      return new Response(JSON.stringify({ episodes }));
     }
 
     return new Response("Method Not Allowed", { status: 405 });
