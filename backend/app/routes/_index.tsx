@@ -21,7 +21,7 @@ export default function Index() {
   const { partykitHost } = useLoaderData<typeof loader>();
 
   return (
-    <div className="flex flex-col justify-start items-start w-full gap-6">
+    <div className="mx-auto flex flex-col justify-start items-start gap-6">
       <h1 className="text-3xl font-semibold">Braggoscope search</h1>
       <Search
         partykitHost={partykitHost}
