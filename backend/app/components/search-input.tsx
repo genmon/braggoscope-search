@@ -7,6 +7,8 @@ export default function SearchInput(props: {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // blur the form
+    event.currentTarget.querySelector("input")?.blur();
     props.handleSearch(query);
   };
 

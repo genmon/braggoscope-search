@@ -16,12 +16,14 @@ export default function Search(props: {
   return (
     <div className="flex flex-col justify-start items-start gap-6">
       <SearchInput handleSearch={handleSearch} />
-      <SearchResults
-        partykitHost={props.partykitHost}
-        party={props.party}
-        room={props.room}
-        query={query}
-      />
+      {query && (
+        <SearchResults
+          partykitHost={props.partykitHost}
+          party={props.party}
+          room={props.room}
+          query={query}
+        />
+      )}
     </div>
   );
 }

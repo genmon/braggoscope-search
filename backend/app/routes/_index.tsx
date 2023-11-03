@@ -1,9 +1,6 @@
 import { useLoaderData } from "@remix-run/react";
-import { useState } from "react";
 import type { MetaFunction } from "partymix";
-import usePartySocket from "partysocket/react";
 import { SEARCH_SINGLETON_ROOM_ID } from "party/search";
-import CreateIndexButton from "~/components/create-index-button";
 import Search from "~/components/search";
 
 // PartyKit will inject the host into the server bundle
@@ -15,47 +12,17 @@ export function loader() {
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "A new search tool" },
-    { name: "description", content: "Vectorize-based search" },
+    { title: "Braggoscope search" },
+    { name: "description", content: "Find episodes of BBC In Our Time" },
   ];
 };
 
 export default function Index() {
   const { partykitHost } = useLoaderData<typeof loader>();
-  const [isDone, setIsDone] = useState(true);
-  const [progress, setProgress] = useState(-1);
-  const [target, setTarget] = useState(-1);
-
-  const socket = usePartySocket({
-    host: partykitHost,
-    party: "search",
-    room: SEARCH_SINGLETON_ROOM_ID,
-    onMessage: (event) => {
-      const message = JSON.parse(event.data);
-      if (message.type === "progress") {
-        setIsDone(false); // always set this as indexing is a central process
-        setProgress(parseInt(message.progress));
-        setTarget(parseInt(message.target));
-      } else if (message.type === "done") {
-        setIsDone(true);
-      }
-    },
-  });
-
-  const handleClick = () => {
-    socket.send(JSON.stringify({ type: "init" }));
-    setIsDone(false);
-  };
 
   return (
     <div className="flex flex-col justify-start items-start w-full gap-6">
-      <h1 className="text-3xl font-semibold">Hello, World!</h1>
-      <CreateIndexButton
-        isDone={isDone}
-        progress={progress}
-        target={target}
-        handleClick={handleClick}
-      />
+      <h1 className="text-3xl font-semibold">Braggoscope search</h1>
       <Search
         partykitHost={partykitHost}
         party="search"

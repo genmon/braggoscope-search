@@ -15,8 +15,10 @@ export default function SearchResults(props: {
   query: string;
 }) {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     const fetchResults = async () => {
       const res = await fetch(
         `//${props.partykitHost}/parties/${props.party}/${props.room}`,
@@ -31,10 +33,15 @@ export default function SearchResults(props: {
 
       const { episodes } = await res.json();
       setEpisodes(episodes);
+      setLoading(false);
     };
 
     fetchResults().catch(console.error);
   }, [props.query]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   if (!episodes.length) {
     return null;
