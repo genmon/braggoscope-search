@@ -1,5 +1,7 @@
 # braggoscope-search
 
+# braggoscope-search
+
 ## cloudflare-vector-search
 
 Implements adding vectors to and querying the vector search index.
