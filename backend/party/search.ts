@@ -5,6 +5,13 @@ import {
   searchEmbeddings,
 } from "./utils/indexer";
 
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST",
+  "Access-Control-Allow-Headers":
+    "Origin, X-Requested-With, Content-Type, Accept",
+};
+
 export const SEARCH_SINGLETON_ROOM_ID = "braggoscope";
 
 export default class SearchServer implements Party.Server {
@@ -70,7 +77,12 @@ export default class SearchServer implements Party.Server {
           score: 0.5,
         },
       ];
-      return new Response(JSON.stringify({ episodes }));
+      return Response.json({ episodes }, { status: 200, headers: CORS });
+    }
+
+    // respond to cors preflight requests
+    if (req.method === "OPTIONS") {
+      return Response.json({ ok: true }, { status: 200, headers: CORS });
     }
 
     return new Response("Method Not Allowed", { status: 405 });
