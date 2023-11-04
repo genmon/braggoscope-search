@@ -15,16 +15,16 @@ export default function SearchInput(props: {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex justify-start items-center gap-2"
+      className="w-full flex justify-start items-center gap-2"
     >
       <input
-        className="border border-gray-300 rounded-sm px-2 py-2 w-80"
+        className="grow border border-gray-300 rounded-sm px-2 py-2 w-full"
         type="text"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />
       <button
-        className="border border-blue-500 hover:bg-blue-100 text-blue-500 hover:text-blue-700 font-semibold py-2 px-4 rounded-sm"
+        className="grow-0 border border-blue-500 hover:bg-blue-100 text-blue-500 hover:text-blue-700 font-semibold py-2 px-4 rounded-sm"
         type="submit"
       >
         Search

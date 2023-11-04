@@ -14,7 +14,7 @@ export default function Search(props: {
   };
 
   return (
-    <div className="flex flex-col justify-start items-start gap-6">
+    <div className="flex flex-col justify-start items-start gap-6 w-full">
       <SearchInput handleSearch={handleSearch} />
       {query && (
         <SearchResults
