@@ -1,4 +1,4 @@
-import { Component, Host, State, h } from '@stencil/core';
+import { Component, Host, Fragment, State, h } from '@stencil/core';
 
 type Episode = {
   id: string;
@@ -14,7 +14,7 @@ type Episode = {
   shadow: true,
 })
 export class BraggoscopeSearch {
-  @State() show: boolean = false;
+  @State() show: boolean = true;
   @State() query: string = '';
   @State() results: Episode[] = [];
 
@@ -45,10 +45,25 @@ export class BraggoscopeSearch {
     });
 
     const { episodes } = await res.json();
-    this.results = episodes;
+    this.results = episodes.splice(0, 10);
   }
 
   render() {
+    const formatDate = (dateString: string) => {
+      // dateString is like "2021-05-27" and we want "27 May, 2021"
+      // Ensure there is a comma before the year
+      const date = new Date(dateString);
+      const options = { year: 'numeric', month: 'short', day: 'numeric' } as Intl.DateTimeFormatOptions;
+      const formatted = date.toLocaleDateString('en-GB', options);
+      // replace the final space ONLY with a comma
+      return formatted.replace(/ ([^ ]*)$/, ', $1');
+    };
+
+    const dismiss = () => {
+      this.results = [];
+      this.show = false;
+    };
+
     return (
       <Host>
         {!this.show && (
@@ -62,34 +77,59 @@ export class BraggoscopeSearch {
         )}
         {this.show && (
           <div id="overlay">
-            <div
-              class="absolute top-0 bottom-0 left-0 right-0"
-              onClick={() => {
-                this.show = false;
-              }}
-            />
-            <div class="relative flex flex-col justify-start items-start gap-6 w-full max-w-md">
+            <div class="absolute top-0 bottom-0 left-0 right-0" onClick={dismiss} />
+            <div class="relative flex flex-col justify-start items-start gap-6 w-full max-w-md max-h-screen p-4">
               {this.results.length === 0 && (
-                <form onSubmit={e => this.handleSubmit(e)} class="w-full flex justify-start items-center gap-1">
-                  <input class="grow border border-gray-300 rounded-sm px-2 py-2 w-full" type="text" value={this.query} onChange={e => this.handleQueryChange(e)} />
-                  <button class="grow-0 bg-white border border-blue-500 hover:bg-blue-100 text-blue-500 hover:text-blue-700 font-semibold py-2 px-4 rounded-sm" type="submit">
-                    Search
-                  </button>
-                </form>
+                <Fragment>
+                  <form onSubmit={e => this.handleSubmit(e)} class="w-full flex justify-stretch items-center gap-1">
+                    <input
+                      class="grow border border-gray-300 rounded-sm px-3 py-3 text-xl"
+                      type="text"
+                      placeholder="e.g. ancient greek mythology"
+                      value={this.query}
+                      onChange={e => this.handleQueryChange(e)}
+                    />
+                    <button
+                      class="grow-0 bg-white border border-blue-500 hover:bg-blue-100 px-6 py-3 text-xl text-blue-500 font-semibold hover:text-blue-700 rounded"
+                      type="submit"
+                    >
+                      Search
+                    </button>
+                  </form>
+                  <div class="w-full justify-center">
+                    <button class="mx-auto flex justify-center items-center text-white/80 gap-1" onClick={dismiss}>
+                      <span>&times;</span>
+                      <span class="underline">Close</span>
+                    </button>
+                  </div>
+                </Fragment>
               )}
               {this.results.length > 0 && (
-                <div class="flex flex-col justify-start items-start gap-2 w-full rounded-sm bg-white p-4">
-                  <div class="font-semibold">Episodes</div>
+                <div class="flex flex-col justify-start items-start gap-6 w-full rounded-sm bg-white p-4 overflow-y-scroll">
+                  <div>
+                    <button
+                      class="underline"
+                      onClick={() => {
+                        this.results = [];
+                      }}
+                    >
+                      &larr; Search again
+                    </button>
+                  </div>
+                  <div class="flex w-full justify-stretch items-center gap-2 text-2xl">
+                    <div class="grow-0 font-semibold">Episodes:</div>
+                    <div class="grow-1 truncate">{this.query}</div>
+                  </div>
                   <ul class="flex flex-col justify-start items-start gap-2">
                     {this.results.map(episode => {
                       return (
-                        <li key={episode.id}>
-                          <a class="text-blue-500 hover:text-blue-700" href={`https://www.braggoscope.com${episode.permalink}`}>
+                        <li key={episode.id} class="leading-relaxed">
+                          <a class="text-blue-500 font-semibold underline" href={`https://www.braggoscope.com${episode.permalink}`}>
                             {episode.title}
                           </a>{' '}
-                          <span class="text-gray-400 text-xs">
-                            {episode.published}. Score: {episode.score}
-                          </span>
+                          <span class="text-gray-400 text-xs">(score: {episode.score})</span>
+                          <br />
+                          <span class="text-gray-400">{formatDate(episode.published)}</span>
                         </li>
                       );
                     })}
