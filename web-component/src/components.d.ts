@@ -7,6 +7,7 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
     interface BraggoscopeSearch {
+        "partykitHost": string;
     }
 }
 declare global {
@@ -22,6 +23,7 @@ declare global {
 }
 declare namespace LocalJSX {
     interface BraggoscopeSearch {
+        "partykitHost"?: string;
     }
     interface IntrinsicElements {
         "braggoscope-search": BraggoscopeSearch;

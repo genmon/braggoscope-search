@@ -1,4 +1,4 @@
-import { Component, Host, Fragment, State, h } from '@stencil/core';
+import { Component, Host, Fragment, State, Prop, h } from '@stencil/core';
 
 type Episode = {
   id: string;
@@ -14,21 +14,21 @@ type Episode = {
   shadow: true,
 })
 export class BraggoscopeSearch {
+  @Prop() partykitHost: string = '127.0.0.1:1999';
+  party: string = 'search';
+  room: string = 'braggoscope';
   @State() show: boolean = true;
   @State() query: string = '';
   @State() results: Episode[] = [];
-
-  partykitHost: string = '127.0.0.1:1999';
-  party: string = 'search';
-  room: string = 'braggoscope';
+  @State() loading: boolean = false;
 
   private handleSubmit(event) {
     event.preventDefault();
     if (!this.query) return;
     // blur the form
     event.currentTarget.querySelector('input')?.blur();
+    this.loading = true;
     this.fetchResults();
-    //window.location.href = `https://www.braggoscope.com/search?q=${this.query}`;
   }
 
   private handleQueryChange(event) {
@@ -46,6 +46,7 @@ export class BraggoscopeSearch {
 
     const { episodes } = await res.json();
     this.results = episodes.splice(0, 10);
+    this.loading = false;
   }
 
   render() {
@@ -89,15 +90,15 @@ export class BraggoscopeSearch {
                       value={this.query}
                       onChange={e => this.handleQueryChange(e)}
                     />
-                    <button
-                      class="grow-0 bg-white border border-blue-500 hover:bg-blue-100 px-6 py-3 text-xl text-blue-500 font-semibold hover:text-blue-700 rounded"
-                      type="submit"
-                    >
+                    <button class="relative grow-0 bg-white border border-blue-500 hover:bg-blue-100 px-6 py-3 text-xl text-blue-500 font-semibold rounded" type="submit">
                       Search
+                      {this.loading && (
+                        <div class="absolute top-0 left-0 bottom-0 right-0 w-full h-full bg-blue-100 font-normal text-blue-400 flex justify-center items-center">Loading...</div>
+                      )}
                     </button>
                   </form>
                   <div class="w-full justify-center">
-                    <button class="mx-auto flex justify-center items-center text-white/80 gap-1" onClick={dismiss}>
+                    <button class="mx-auto flex justify-center items-center text-white/90 gap-1" onClick={dismiss}>
                       <span>&times;</span>
                       <span class="underline">Close</span>
                     </button>
@@ -123,8 +124,8 @@ export class BraggoscopeSearch {
                   <ul class="flex flex-col justify-start items-start gap-2">
                     {this.results.map(episode => {
                       return (
-                        <li key={episode.id} class="leading-relaxed">
-                          <a class="text-blue-500 font-semibold underline" href={`https://www.braggoscope.com${episode.permalink}`}>
+                        <li key={episode.id} class="leading-normal">
+                          <a class="text-blue-500 font-bold underline" href={`https://www.braggoscope.com${episode.permalink}`}>
                             {episode.title}
                           </a>{' '}
                           <span class="text-gray-400 text-xs">(score: {episode.score})</span>
