@@ -15,6 +15,7 @@ type Episode = {
 })
 export class BraggoscopeSearch {
   @Prop() partykitHost: string = '127.0.0.1:1999';
+  protocol: string = this.partykitHost.startsWith('localhost') || this.partykitHost.startsWith('127.0.0.1') ? 'http' : 'https';
   party: string = 'search';
   room: string = 'braggoscope';
   @State() show: boolean = false;
@@ -36,7 +37,7 @@ export class BraggoscopeSearch {
   }
 
   private async fetchResults() {
-    const res = await fetch(`//${this.partykitHost}/parties/${this.party}/${this.room}`, {
+    const res = await fetch(`${this.protocol}://${this.partykitHost}/parties/${this.party}/${this.room}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -60,6 +61,11 @@ export class BraggoscopeSearch {
       return formatted.replace(/ ([^ ]*)$/, ', $1');
     };
 
+    const formatScore = (score: number) => {
+      // score is like 0.123456789 and we want 12.3%
+      return `${Math.round(score * 1000) / 10}%`;
+    };
+
     const show = () => {
       document.body.style.overflow = 'hidden';
       this.show = true;
@@ -79,18 +85,21 @@ export class BraggoscopeSearch {
         {this.show && (
           <div id="overlay">
             <div class="absolute top-0 bottom-0 left-0 right-0" onClick={dismiss} />
-            <div class="relative flex flex-col justify-start items-start gap-6 w-full max-w-md max-h-screen p-4">
+            <div class="relative flex flex-col justify-start items-center gap-6 w-full max-w-md max-h-screen p-4">
               {this.results.length === 0 && (
                 <Fragment>
-                  <form onSubmit={e => this.handleSubmit(e)} class="w-full flex justify-stretch items-center gap-1">
+                  <form onSubmit={e => this.handleSubmit(e)} class="flex flex-wrap sm:flex-no-wrap justify-stretch items-center gap-1">
                     <input
                       class="grow border border-gray-300 rounded-sm px-3 py-3 text-xl"
                       type="text"
-                      placeholder="e.g. ancient greek mythology"
+                      placeholder="e.g. greek mythology"
                       value={this.query}
                       onChange={e => this.handleQueryChange(e)}
                     />
-                    <button class="relative grow-0 bg-white border border-blue-500 hover:bg-blue-100 px-6 py-3 text-xl text-blue-500 font-semibold rounded" type="submit">
+                    <button
+                      class="relative grow-0 w-full sm:w-fit bg-white border border-blue-500 hover:bg-blue-100 px-6 py-3 text-xl text-blue-500 font-semibold rounded"
+                      type="submit"
+                    >
                       Search
                       {this.loading && (
                         <div class="absolute top-0 left-0 bottom-0 right-0 w-full h-full bg-blue-100 font-normal text-blue-400 flex justify-center items-center">Loading...</div>
@@ -128,7 +137,7 @@ export class BraggoscopeSearch {
                           <a class="text-blue-500 font-bold underline" href={`https://www.braggoscope.com${episode.permalink}`}>
                             {episode.title}
                           </a>{' '}
-                          <span class="text-gray-400 text-xs">(score: {episode.score})</span>
+                          <span class="text-gray-400 text-xs">(score: {formatScore(episode.score)})</span>
                           <br />
                           <span class="text-gray-400">{formatDate(episode.published)}</span>
                         </li>
