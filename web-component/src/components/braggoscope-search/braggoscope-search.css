@@ -8,4 +8,5 @@
   @apply flex flex-col items-center justify-center;
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
+  @apply font-sans;
 }
