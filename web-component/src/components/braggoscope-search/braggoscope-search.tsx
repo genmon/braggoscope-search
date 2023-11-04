@@ -72,6 +72,7 @@ export class BraggoscopeSearch {
     };
 
     const dismiss = () => {
+      this.query = '';
       this.results = [];
       document.body.style.overflow = 'auto';
       this.show = false;
@@ -85,24 +86,23 @@ export class BraggoscopeSearch {
         {this.show && (
           <div id="overlay">
             <div class="absolute top-0 bottom-0 left-0 right-0" onClick={dismiss} />
-            <div class="relative flex flex-col justify-start items-center gap-6 w-full max-w-md max-h-screen p-4">
+            <div class="relative flex flex-col justify-start items-center gap-6 w-full max-w-md p-4" style={{ maxHeight: '100dvh' }}>
               {this.results.length === 0 && (
                 <Fragment>
-                  <form onSubmit={e => this.handleSubmit(e)} class="flex flex-wrap sm:flex-no-wrap justify-stretch items-center gap-1">
+                  <form onSubmit={e => this.handleSubmit(e)} class="w-full flex flex-wrap sm:flex-no-wrap justify-stretch items-center gap-1">
                     <input
-                      class="grow border border-gray-300 rounded-sm px-3 py-3 text-xl"
+                      class="w-full sm:w-auto sm:grow border border-gray-300 rounded-sm px-3 py-3 text-xl"
                       type="text"
                       placeholder="e.g. greek mythology"
                       value={this.query}
                       onChange={e => this.handleQueryChange(e)}
                     />
-                    <button
-                      class="relative grow-0 w-full sm:w-fit bg-white border border-blue-500 hover:bg-blue-100 px-6 py-3 text-xl text-blue-500 font-semibold rounded"
-                      type="submit"
-                    >
+                    <button class="relative w-full sm:grow-0 sm:w-fit bg-white border border-blue-500 hover:bg-blue-100 px-6 py-3 text-xl text-blue-500 rounded" type="submit">
                       Search
                       {this.loading && (
-                        <div class="absolute top-0 left-0 bottom-0 right-0 w-full h-full bg-blue-100 font-normal text-blue-400 flex justify-center items-center">Loading...</div>
+                        <div class="absolute top-0 left-0 bottom-0 right-0 w-full h-full bg-blue-100 font-normal text-blue-400 flex justify-center items-center cursor-wait">
+                          Loading...
+                        </div>
                       )}
                     </button>
                   </form>
