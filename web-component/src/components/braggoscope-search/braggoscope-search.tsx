@@ -116,7 +116,7 @@ export class BraggoscopeSearch {
               )}
               {this.results.length > 0 && (
                 <div class="flex flex-col justify-start items-start gap-6 w-full rounded-sm bg-white p-4 overflow-y-scroll">
-                  <div>
+                  <div class="w-full flex justify-between">
                     <button
                       class="underline"
                       onClick={() => {
@@ -124,6 +124,9 @@ export class BraggoscopeSearch {
                       }}
                     >
                       &larr; Search again
+                    </button>
+                    <button class="flex justify-center items-center gap-1 underline" onClick={dismiss}>
+                      Close
                     </button>
                   </div>
                   <div class="flex w-full justify-stretch items-center gap-2 text-2xl">
