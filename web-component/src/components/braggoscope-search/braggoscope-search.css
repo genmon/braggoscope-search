@@ -3,8 +3,8 @@
 }
 
 #overlay {
-  @apply fixed top-0 left-0 right-0 bottom-0 z-10;
-  @apply bg-black/40;
+  @apply fixed top-0 left-0 right-0 bottom-0 z-10 overscroll-contain;
+  @apply bg-black/50;
   @apply flex flex-col items-center justify-center;
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);

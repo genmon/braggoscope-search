@@ -17,7 +17,7 @@ export class BraggoscopeSearch {
   @Prop() partykitHost: string = '127.0.0.1:1999';
   party: string = 'search';
   room: string = 'braggoscope';
-  @State() show: boolean = true;
+  @State() show: boolean = false;
   @State() query: string = '';
   @State() results: Episode[] = [];
   @State() loading: boolean = false;
@@ -60,22 +60,22 @@ export class BraggoscopeSearch {
       return formatted.replace(/ ([^ ]*)$/, ', $1');
     };
 
+    const show = () => {
+      document.body.style.overflow = 'hidden';
+      this.show = true;
+    };
+
     const dismiss = () => {
       this.results = [];
+      document.body.style.overflow = 'auto';
       this.show = false;
     };
 
     return (
       <Host>
-        {!this.show && (
-          <button
-            onClick={() => {
-              this.show = true;
-            }}
-          >
-            <slot></slot>
-          </button>
-        )}
+        <button onClick={show}>
+          <slot></slot>
+        </button>
         {this.show && (
           <div id="overlay">
             <div class="absolute top-0 bottom-0 left-0 right-0" onClick={dismiss} />
