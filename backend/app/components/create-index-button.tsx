@@ -12,6 +12,7 @@ export default function CreateIndexButton(props: {
     >
       <progress
         className="-z-10 absolute top-0 left-0 bottom-0 right-0 w-full h-full progress-unfilled:bg-white progress-filled:bg-blue-300"
+        style={{ WebkitAppearance: "none" }}
         value={props.progress}
         max={props.target}
       />
