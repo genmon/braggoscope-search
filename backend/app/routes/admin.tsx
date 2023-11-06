@@ -9,8 +9,12 @@ import Search from "~/components/search";
 // PartyKit will inject the host into the server bundle
 // so let's read it here and expose it to the client
 declare const PARTYKIT_HOST: string;
-export function loader() {
-  return { partykitHost: PARTYKIT_HOST };
+export function loader({ request }) {
+  // parse the search params for `?q=`
+  const url = new URL(request.url);
+  const adminKey = url.searchParams.get("key");
+
+  return { partykitHost: PARTYKIT_HOST, adminKey };
 }
 
 export const meta: MetaFunction = () => {
@@ -21,7 +25,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Admin() {
-  const { partykitHost } = useLoaderData<typeof loader>();
+  const { partykitHost, adminKey } = useLoaderData<typeof loader>();
   const [isDone, setIsDone] = useState(true);
   const [progress, setProgress] = useState(-1);
   const [target, setTarget] = useState(-1);
@@ -43,7 +47,7 @@ export default function Admin() {
   });
 
   const handleClick = () => {
-    socket.send(JSON.stringify({ type: "init" }));
+    socket.send(JSON.stringify({ type: "init", adminKey: adminKey }));
     setIsDone(false);
   };
 
@@ -56,6 +60,11 @@ export default function Admin() {
         target={target}
         handleClick={handleClick}
       />
+      <p>
+        To start building the index, ensure that <code>?key=XXX</code> is in the
+        URL and the key matches the enviroment variable{" "}
+        <code>BRAGGOSCOPE_SEARCH_ADMIN_KEY</code>.
+      </p>
     </div>
   );
 }

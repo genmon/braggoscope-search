@@ -25,6 +25,10 @@ export default class SearchServer implements Party.Server {
     const message = JSON.parse(msg);
 
     if (message.type === "init") {
+      // As a minimal password system, only permit messages that include an adminKey
+      // that matches a secret in the environment.
+      if (message.adminKey !== this.party.env.BRAGGOSCOPE_SEARCH_ADMIN_KEY)
+        return;
       await this.buildIndex();
     }
   }
