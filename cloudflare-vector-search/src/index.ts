@@ -15,16 +15,6 @@ export interface Env {
 	AI: Ai;
 }
 
-app.get('/', async (c: Context) => {
-	const ai = new Ai(c.env.AI);
-
-	const answer = await ai.run('@cf/meta/llama-2-7b-chat-int8', {
-		messages: [{ role: 'user', content: `What is the square root of 9?` }],
-	});
-
-	return c.json(answer);
-});
-
 /*
 POST queries the database.
 
@@ -59,7 +49,6 @@ app.post('/', async (c: Context) => {
 	const values = data[0];
 
 	// Query the database. `returnVectors: true` means we get metadata too
-	// This is not scoped to the guildId
 	const nearest = await c.env.VECTOR_INDEX.query(values, { topK: 15, returnVectors: true });
 
 	const found: { id: string; title: string; published: string; permalink: string; score: number }[] = [];
