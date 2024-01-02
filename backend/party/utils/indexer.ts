@@ -13,6 +13,57 @@ export async function getEpisodes() {
   );
 }
 
+export async function batchUpsert({
+  env,
+  episodes,
+}: {
+  env: Record<string, any>;
+  episodes: {
+    id: string;
+    title: string;
+    published: string;
+    permalink: string;
+    description: string;
+  }[];
+}) {
+  if (episodes.length > 100) {
+    throw new Error("Too many episodes");
+  }
+
+  // Get embeddings
+  const { embeddings } = await fetch(
+    new URL(`${env.CLOUDFLARE_VECTORIZE_URL}/embeddings`),
+    {
+      method: "POST",
+      body: JSON.stringify({
+        text: episodes.map((episode) => episode.description),
+      }),
+    }
+  ).then((res) => res.json());
+
+  // Create vector objects
+  const vectors = episodes.map((episode, i) => ({
+    id: episode.id,
+    values: embeddings[i],
+    metadata: {
+      title: episode.title,
+      published: episode.published,
+      permalink: episode.permalink,
+    },
+  }));
+
+  // Upsert
+  const result = await fetch(
+    new URL(`${env.CLOUDFLARE_VECTORIZE_URL}/upsert`),
+    {
+      method: "POST",
+      body: JSON.stringify({ vectors }),
+    }
+  );
+
+  console.log(JSON.stringify(await result.json(), null, 2));
+}
+
 export async function upsertEmbedding(params: {
   env: Record<string, any>;
   id: string;

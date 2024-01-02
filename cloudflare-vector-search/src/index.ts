@@ -102,4 +102,72 @@ app.put('/', async (c: Context) => {
 	return c.json({ ...upserted });
 });
 
+/*
+POST /embeddings batch generates embeddings for the supplied text.
+
+Takes a JSON object like:
+
+{ text: string[] }
+
+and returns a JSON object like:
+
+{ embeddings: number[][] }
+
+Test:
+
+curl \
+-X POST \
+--json '{"text": ["hello world", "goodbye world"]}' \
+https://cloudflare-vector-search.matt-23b.workers.dev/embeddings
+
+*/
+app.post('/embeddings', async (c: Context) => {
+	const ai = new Ai(c.env.AI);
+
+	const { text } = await c.req.json();
+
+	if (!text) {
+		return c.json({ error: 'Missing required parameters' }, { status: 400 });
+	}
+
+	const { data } = await ai.run('@cf/baai/bge-base-en-v1.5', { text });
+
+	return c.json({ embeddings: data });
+});
+
+/*
+PUT inserts a new embedding into the database for a given guildId and channelId.
+
+It takes a JSON object like:
+{ vectors: [
+	{
+		id: string,
+		values: number[],
+		metadata: {
+			title: string,
+			published: string,
+			permalink: string,
+		}
+	}
+]
+}
+
+And returns a JSON object like:
+
+{ ... }
+*/
+app.post('/upsert', async (c: Context) => {
+	const { vectors } = await c.req.json();
+
+	if (!vectors) {
+		return c.json({ error: 'Missing required parameters' }, { status: 400 });
+	}
+
+	// Upsert the embedding into the database
+	// Use an ID to ensure that we only have one embedding for this guildId and channelId
+	const upserted = await c.env.VECTOR_INDEX.upsert(vectors);
+
+	return c.json({ ...upserted });
+});
+
 export default app;

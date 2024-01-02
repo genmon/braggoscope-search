@@ -3,6 +3,7 @@ import {
   getEpisodes,
   upsertEmbedding,
   searchEmbeddings,
+  batchUpsert,
 } from "./utils/indexer";
 
 const CORS = {
@@ -29,7 +30,8 @@ export default class SearchServer implements Party.Server {
       // that matches a secret in the environment.
       if (message.adminKey !== this.party.env.BRAGGOSCOPE_SEARCH_ADMIN_KEY)
         return;
-      await this.buildIndex();
+      //await this.buildIndex();
+      await this.batchBuildIndex();
     }
   }
 
@@ -54,6 +56,29 @@ export default class SearchServer implements Party.Server {
       //const { id, title, published, permalink, description } = episode;
       await upsertEmbedding({ ...episode, env: this.party.env });
       this.progress += 1;
+      this.broadcastProgress();
+    }
+
+    this.party.broadcast(
+      JSON.stringify({
+        type: "done",
+      })
+    );
+  }
+
+  async batchBuildIndex() {
+    const episodes = await getEpisodes();
+    this.target = episodes.length;
+    this.progress = 0;
+    this.broadcastProgress();
+
+    // Page through episodes
+    const PAGE_SIZE = 20;
+    const pages = Math.ceil(episodes.length / PAGE_SIZE);
+    for (let i = 0; i < pages; i++) {
+      const page = episodes.slice(i * PAGE_SIZE, (i + 1) * PAGE_SIZE);
+      await batchUpsert({ env: this.party.env, episodes: page });
+      this.progress += PAGE_SIZE;
       this.broadcastProgress();
     }
 
