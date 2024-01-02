@@ -1,3 +1,5 @@
+import { Ai } from "partykit-ai";
+
 async function buildIndex(params: { env: Record<string, any> }) {
   const episodes = await getEpisodes();
 
@@ -17,6 +19,7 @@ export async function batchUpsert({
   env,
   episodes,
   searchIndex,
+  ai,
 }: {
   env: Record<string, any>;
   episodes: {
@@ -27,12 +30,14 @@ export async function batchUpsert({
     description: string;
   }[];
   searchIndex: any;
+  ai: Ai;
 }) {
   if (episodes.length > 100) {
     throw new Error("Too many episodes");
   }
 
   // Get embeddings
+  /*
   const { embeddings } = await fetch(
     new URL(`${env.CLOUDFLARE_VECTORIZE_URL}/embeddings`),
     {
@@ -42,11 +47,15 @@ export async function batchUpsert({
       }),
     }
   ).then((res) => res.json());
+  */
+  const { data } = await ai.run("@cf/baai/bge-base-en-v1.5", {
+    text: episodes.map((episode) => episode.description),
+  });
 
   // Create vector objects
   const vectors = episodes.map((episode, i) => ({
     id: episode.id,
-    values: embeddings[i],
+    values: data[i],
     metadata: {
       title: episode.title,
       published: episode.published,
@@ -110,10 +119,12 @@ export async function search(params: {
   env: Record<string, any>;
   query: string;
   searchIndex: any;
+  ai: Ai;
 }) {
   const { env, query, searchIndex } = params;
 
   // Get the vector for the query
+  /*
   const { embeddings } = await fetch(
     new URL(`${env.CLOUDFLARE_VECTORIZE_URL}/embeddings`),
     {
@@ -123,8 +134,12 @@ export async function search(params: {
       }),
     }
   ).then((res) => res.json());
+  */
+  const { data } = await params.ai.run("@cf/baai/bge-base-en-v1.5", {
+    text: [query],
+  });
 
-  const queryVector = embeddings[0];
+  const queryVector = data[0];
 
   // Search the index for the query vector
   const nearest = await searchIndex.query(queryVector, {

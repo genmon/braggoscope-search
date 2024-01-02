@@ -24,6 +24,7 @@ export default function Search(props: {
           query={query}
         />
       )}
+      <code className="font-mono text-xs">{props.partykitHost}</code>
     </div>
   );
 }

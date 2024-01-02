@@ -11,6 +11,7 @@
     "process.env.REMIX_DEV_SERVER_WS_PORT": "8002"
   },
   "vectorize": {
-    "searchIndex": "braggoscope-search"
-  }
+    "searchIndex3": "braggoscope-search-3"
+  },
+  "ai": true
 }

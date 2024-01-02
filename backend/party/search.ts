@@ -1,4 +1,5 @@
 import type * as Party from "partykit/server";
+import { Ai } from "partykit-ai";
 import {
   getEpisodes,
   upsertEmbedding,
@@ -20,8 +21,11 @@ export default class SearchServer implements Party.Server {
   progress = 0;
   target = 100;
   interval: ReturnType<typeof setInterval> | null = null;
+  ai: Ai;
 
-  constructor(public party: Party.Party) {}
+  constructor(public party: Party.Room) {
+    this.ai = new Ai(party.ai);
+  }
 
   async onMessage(msg: string, connection: Party.Connection) {
     const message = JSON.parse(msg);
@@ -74,14 +78,15 @@ export default class SearchServer implements Party.Server {
     this.broadcastProgress();
 
     // Page through episodes
-    const PAGE_SIZE = 1;
+    const PAGE_SIZE = 20;
     const pages = Math.ceil(episodes.length / PAGE_SIZE);
     for (let i = 0; i < pages; i++) {
       const page = episodes.slice(i * PAGE_SIZE, (i + 1) * PAGE_SIZE);
       await batchUpsert({
         env: this.party.env,
         episodes: page,
-        searchIndex: this.party.context.vectorize.searchIndex,
+        searchIndex: this.party.context.vectorize.searchIndex3,
+        ai: this.ai,
       });
       this.progress += PAGE_SIZE;
       this.broadcastProgress();
@@ -104,7 +109,8 @@ export default class SearchServer implements Party.Server {
       const episodes = await search({
         env: this.party.env,
         query,
-        searchIndex: this.party.context.vectorize.searchIndex,
+        searchIndex: this.party.context.vectorize.searchIndex3,
+        ai: this.ai,
       });
       const dummyEpisodes = [
         {
