@@ -27,8 +27,7 @@ export default class SearchServer implements Party.Server {
     const message = JSON.parse(msg);
 
     if (message.type === "init") {
-      // As a minimal password system, only permit messages that include an adminKey
-      // that matches a secret in the environment.
+      // Minimal security! Only allow the admin key to trigger a rebuild
       if (message.adminKey !== this.party.env.BRAGGOSCOPE_SEARCH_ADMIN_KEY)
         return;
       await this.buildIndex();
@@ -88,7 +87,6 @@ export default class SearchServer implements Party.Server {
     const { data } = await this.ai.run("@cf/baai/bge-base-en-v1.5", {
       text: episodes.map((episode: any) => episode.description),
     });
-    console.log("got embeddings", data);
 
     // Vectorize uses vector objects. Combine the episodes list with the embeddings
     const vectors = episodes.map((episode: any, i: number) => ({
@@ -105,7 +103,6 @@ export default class SearchServer implements Party.Server {
     const result = await this.party.context.vectorize.searchIndex.upsert(
       vectors
     );
-    console.log("upserted", result);
   }
 
   async search(query: string) {
@@ -126,13 +123,11 @@ export default class SearchServer implements Party.Server {
       }
     );
 
-    //console.log("nearest", nearest);
-
     const found: {
       id: string;
-      title?: string;
-      published?: string;
-      permalink?: string;
+      title: string;
+      published: string;
+      permalink: string;
       score: number;
     }[] = [];
 

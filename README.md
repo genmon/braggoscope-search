@@ -46,7 +46,7 @@ Test like:
 ```
 curl \
 --json '{"query": "greek myths"}' \
-https://braggoscope-search.genmon.partykit.dev/parties/search/braggoscope
+https://braggoscope-search.genmon.partykit.dev/parties/search/api
 ```
 
 That's the URL to use behind the search box on braggoscope.com.

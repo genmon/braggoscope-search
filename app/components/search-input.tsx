@@ -21,6 +21,7 @@ export default function SearchInput(props: {
         className="grow border border-gray-300 rounded-sm px-2 py-2 w-full"
         type="text"
         value={query}
+        placeholder="e.g. greek myths"
         onChange={(event) => setQuery(event.target.value)}
       />
       <button
