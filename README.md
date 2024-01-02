@@ -27,26 +27,115 @@ This server also includes:
 - [Try the demo hosted on PartyKit](https://braggoscope-search.genmon.partykit.dev)
 - [Use the search on braggoscope.com](https://www.braggoscope.com) -- tap **Search** in the top nav
 
-## [Developers] Usage
+## Usage
 
-Create the vector index before building the index for the first time:
+These instructions assume you have cloned the repo, installed packaged, and signed into PartyKit (required for using certain features):
+
+```
+npm install
+npx partykit login
+```
+
+**1. Create the vector database**
+
+You only need to do this once.
+
+Vectorize is a Cloudflare-hosted vector database. We'll use one managed by PartyKit because then it's easier to use from the PartyKit server.
+
+Create the vector index:
 
 ```
 npx partykit vectorize create braggoscope-search --dimensions 768 --metric cosine
 ```
 
-Before querying, you must build the index:
+This is made available in the PartyKit server with these lines in `partykit.json`:
 
-Visit `https://braggoscope-search.genmon.partykit.dev/admin?key=BRAGGOSCOPE_SEARCH_ADMIN_KEY`
+```
+  "vectorize": {
+    "searchIndex": "braggoscope-search"
+  },
+  "ai": true
+```
 
-and hit the "Index" button.
+Note the `"ai": true` which also makes Cloudflare's Workers AI available in the PartyKit server.
 
-Test like:
+**2. Build the index**
+
+The vector database is empty. We need to add documents to it.
+
+braggoscope.com is a static site for exploring episodes of BBC Radio 4's _In Our Time._ As part of the build process, it outputs a JSON file of documents to index.
+
+Have a look at episodes.json here: [www.braggoscope.com/episodes.json](www.braggoscope.com/episodes.json).
+
+This document looks like:
+
+```
+[
+  {
+    "id":"p0038x9h",
+    "title":"The Speed of Light",
+    "published":"2006-11-30",
+    "permalink":"/2006/11/30/the-speed-of-light.html",
+    "description":"Melvyn Bragg and guests discuss the speed of light. Scientists and thinkers ..."
+  },
+  ...
+]
+```
+
+We want to create a vector embedding of the description, and store it against the other properties as metadata.
+
+We have to kick off indexing manually, so we have some minimal security around it. We'll use an admin key to protect the endpoint. Store this in `.env`:
+
+```
+echo "BRAGGOSCOPE_SEARCH_ADMIN_KEY=foo-admin-key\n" > .env
+```
+
+Then run the server locally and start indexing:
+
+```bash
+npm run dev
+```
+
+Then visit [127.0.0.1:1999/admin?key=foo-admin-key](http://127.0.0.1:1999/admin?key=foo-admin-key) and click _"Create Index"_.
+
+**3. Test the search with the test UI**
+
+After indexing, visit [127.0.0.1:1999](http://127.0.0.1:1999) to test the search.
+
+Try the query "greek myths" and you should see a list of episodes related to the Greek myths.
+
+**4. Test the search API**
+
+The search feature on braggoscope.com makes a POST request to the search API. You can test this with curl:
 
 ```
 curl \
 --json '{"query": "greek myths"}' \
-https://braggoscope-search.genmon.partykit.dev/parties/search/api
+http://127.0.0.1:1999/parties/search/api
 ```
 
-That's the URL to use behind the search box on braggoscope.com.
+You will see a JSON object of results being returned.
+
+**5. Deploy the server and test again.**
+
+Deploy the server to a public URL:
+
+```
+npm partykit deploy
+```
+
+Note: do not use the usual `npx partykit deploy`! The `deploy` script we're using here also (1) ensures that the site is built first; and (2) sets the environment variables from `.env`.
+
+Wait for the deploy to complete (you may have to wait a couple extra minutes for the domain to be provisioned) then build the index again:
+
+Visit `https://braggoscope-search.YOUR-PARTYKIT-USERNAME.partykit.dev/admin?key=foo-admin-key`
+
+(Replace `YOUR-PARTYKIT-USERNAME` with your PartyKit username, and `foo-admin-key` with the admin key you set in `.env`.)
+
+After indexing, use the test UI and the search API to test the search again.
+
+**6. Integrate**
+
+View source at [www.braggoscope.com](https://www.braggoscope.com) to see how the search is integrated into the site. It's a simple form that makes a POST request to the search API, and displays the results.
+
+The process to re-index to run whenever the site is updated.
