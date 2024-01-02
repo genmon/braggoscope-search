@@ -4,6 +4,7 @@ import {
   upsertEmbedding,
   searchEmbeddings,
   batchUpsert,
+  search,
 } from "./utils/indexer";
 
 const CORS = {
@@ -73,11 +74,15 @@ export default class SearchServer implements Party.Server {
     this.broadcastProgress();
 
     // Page through episodes
-    const PAGE_SIZE = 20;
+    const PAGE_SIZE = 1;
     const pages = Math.ceil(episodes.length / PAGE_SIZE);
     for (let i = 0; i < pages; i++) {
       const page = episodes.slice(i * PAGE_SIZE, (i + 1) * PAGE_SIZE);
-      await batchUpsert({ env: this.party.env, episodes: page });
+      await batchUpsert({
+        env: this.party.env,
+        episodes: page,
+        searchIndex: this.party.context.vectorize.searchIndex,
+      });
       this.progress += PAGE_SIZE;
       this.broadcastProgress();
     }
@@ -96,7 +101,11 @@ export default class SearchServer implements Party.Server {
 
     if (req.method === "POST") {
       const { query } = (await req.json()) as any;
-      const episodes = await searchEmbeddings({ env: this.party.env, query });
+      const episodes = await search({
+        env: this.party.env,
+        query,
+        searchIndex: this.party.context.vectorize.searchIndex,
+      });
       const dummyEpisodes = [
         {
           id: "123",

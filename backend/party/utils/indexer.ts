@@ -16,6 +16,7 @@ export async function getEpisodes() {
 export async function batchUpsert({
   env,
   episodes,
+  searchIndex,
 }: {
   env: Record<string, any>;
   episodes: {
@@ -25,6 +26,7 @@ export async function batchUpsert({
     permalink: string;
     description: string;
   }[];
+  searchIndex: any;
 }) {
   if (episodes.length > 100) {
     throw new Error("Too many episodes");
@@ -53,6 +55,7 @@ export async function batchUpsert({
   }));
 
   // Upsert
+  /*
   const result = await fetch(
     new URL(`${env.CLOUDFLARE_VECTORIZE_URL}/upsert`),
     {
@@ -60,8 +63,11 @@ export async function batchUpsert({
       body: JSON.stringify({ vectors }),
     }
   );
+  */
+  console.log("upserting", vectors);
+  const result = searchIndex.upsert(vectors);
 
-  console.log(JSON.stringify(await result.json(), null, 2));
+  console.log(JSON.stringify(result, null, 2));
 }
 
 export async function upsertEmbedding(params: {
@@ -87,6 +93,7 @@ export async function upsertEmbedding(params: {
 export async function searchEmbeddings(params: {
   env: Record<string, any>;
   query: string;
+  searchIndex: any;
 }) {
   const res = await fetch(new URL(params.env.CLOUDFLARE_VECTORIZE_URL), {
     method: "POST",
@@ -95,5 +102,53 @@ export async function searchEmbeddings(params: {
     }),
   });
   const { matches } = await res.json();
+  console.log("matches", matches);
   return matches ?? [];
+}
+
+export async function search(params: {
+  env: Record<string, any>;
+  query: string;
+  searchIndex: any;
+}) {
+  const { env, query, searchIndex } = params;
+
+  // Get the vector for the query
+  const { embeddings } = await fetch(
+    new URL(`${env.CLOUDFLARE_VECTORIZE_URL}/embeddings`),
+    {
+      method: "POST",
+      body: JSON.stringify({
+        text: [query],
+      }),
+    }
+  ).then((res) => res.json());
+
+  const queryVector = embeddings[0];
+
+  // Search the index for the query vector
+  const nearest = await searchIndex.query(queryVector, {
+    topK: 15,
+    returnValues: false,
+    returnMetadata: true,
+  });
+
+  const found: {
+    id: string;
+    title: string;
+    published: string;
+    permalink: string;
+    score: number;
+  }[] = [];
+
+  for (const match of nearest.matches) {
+    found.push({
+      id: match.vector.id,
+      ...match.vector.metadata,
+      score: match.score,
+    });
+  }
+
+  // Return maximum 15 results
+  return found.slice(0, 15);
 }
