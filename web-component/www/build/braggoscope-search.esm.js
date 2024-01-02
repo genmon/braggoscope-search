@@ -1,0 +1,2 @@
+import{p as t,b as o}from"./p-aa8dc9d6.js";export{s as setNonce}from"./p-aa8dc9d6.js";const a=()=>{const s=import.meta.url;const o={};if(s!==""){o.resourcesUrl=new URL(".",s).href}return t(o)};a().then((s=>o([["p-acbff155",[[1,"braggoscope-search",{partykitHost:[1,"partykit-host"],show:[32],query:[32],results:[32],loading:[32]}]]]],s)));
+//# sourceMappingURL=braggoscope-search.esm.js.map
