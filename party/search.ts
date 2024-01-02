@@ -8,7 +8,7 @@ const CORS = {
     "Origin, X-Requested-With, Content-Type, Accept",
 };
 
-export const SEARCH_SINGLETON_ROOM_ID = "braggoscope";
+export const SEARCH_SINGLETON_ROOM_ID = "api";
 
 export async function getEpisodes() {
   return await fetch("https://www.braggoscope.com/episodes.json").then((res) =>
@@ -117,7 +117,7 @@ export default class SearchServer implements Party.Server {
     const queryVector = data[0];
 
     // Search the index for the query vector
-    const nearest = await this.party.context.vectorize.searchIndex.query(
+    const nearest: any = await this.party.context.vectorize.searchIndex.query(
       queryVector,
       {
         topK: 15,
@@ -126,7 +126,7 @@ export default class SearchServer implements Party.Server {
       }
     );
 
-    console.log("nearest", nearest);
+    //console.log("nearest", nearest);
 
     const found: {
       id: string;
