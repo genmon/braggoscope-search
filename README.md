@@ -65,7 +65,7 @@ The vector database is empty. We need to add documents to it.
 
 braggoscope.com is a static site for exploring episodes of BBC Radio 4's _In Our Time._ As part of the build process, it outputs a JSON file of documents to index.
 
-Have a look at episodes.json here: [www.braggoscope.com/episodes.json](www.braggoscope.com/episodes.json).
+Have a look at episodes.json here: [www.braggoscope.com/episodes.json](https://www.braggoscope.com/episodes.json).
 
 This document looks like:
 
