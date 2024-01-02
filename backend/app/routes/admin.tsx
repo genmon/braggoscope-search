@@ -31,7 +31,7 @@ export default function Admin() {
   const [target, setTarget] = useState(-1);
 
   const socket = usePartySocket({
-    host: "staging-3.braggoscope-search.genmon.partykit.dev", // partykitHost,
+    host: partykitHost,
     party: "search",
     room: SEARCH_SINGLETON_ROOM_ID,
     onMessage: (event) => {

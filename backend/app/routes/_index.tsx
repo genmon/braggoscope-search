@@ -18,8 +18,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  //const { partykitHost } = useLoaderData<typeof loader>();
-  const partykitHost = "staging-3.braggoscope-search.genmon.partykit.dev";
+  const { partykitHost } = useLoaderData<typeof loader>();
 
   return (
     <div className="mx-auto flex flex-col justify-start items-start gap-6 w-full max-w-md">
