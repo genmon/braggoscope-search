@@ -3,15 +3,15 @@
   "main": "build/index.js",
   "compatibilityDate": "2023-10-14",
   "serve": "public",
-  "parties": {
-    "search": "party/search.ts"
-  },
   "define": {
     "process.env.REMIX_DEV_ORIGIN": "'http://127.0.0.1:8002'",
     "process.env.REMIX_DEV_SERVER_WS_PORT": "8002"
   },
+  "parties": {
+    "search": "party/search.ts"
+  },
   "vectorize": {
-    "searchIndex": "braggoscope-search"
+    "searchIndex": "braggoscope-index"
   },
   "ai": true
 }

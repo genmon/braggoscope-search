@@ -112,7 +112,10 @@ export default class SearchServer implements Party.Server {
     }));
 
     // Upsert the embeddings into the database
-    await this.party.context.vectorize.searchIndex.upsert(vectors);
+    const result = await this.party.context.vectorize.searchIndex.upsert(
+      vectors
+    );
+    console.log(result);
   }
 
   async search(query: string) {
