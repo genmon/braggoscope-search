@@ -28,6 +28,7 @@ export default function Admin() {
   const [isDone, setIsDone] = useState(true);
   const [progress, setProgress] = useState(-1);
   const [target, setTarget] = useState(-1);
+  const [error, setError] = useState<string | null>(null);
 
   const socket = usePartySocket({
     host: partykitHost,
@@ -41,6 +42,8 @@ export default function Admin() {
         setTarget(parseInt(message.target));
       } else if (message.type === "done") {
         setIsDone(true);
+      } else if (message.type === "error") {
+        setError(message.error);
       }
     },
   });
@@ -64,6 +67,7 @@ export default function Admin() {
         URL and the key matches the enviroment variable{" "}
         <code>BRAGGOSCOPE_SEARCH_ADMIN_KEY</code>.
       </p>
+      {error && <p className="text-red-500">Error: {JSON.stringify(error)}</p>}
     </div>
   );
 }

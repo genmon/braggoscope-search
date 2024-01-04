@@ -1,14 +1,14 @@
 import type * as Party from "partykit/server";
 import { Ai } from "partykit-ai";
 
+export const SEARCH_SINGLETON_ROOM_ID = "api";
+
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST",
   "Access-Control-Allow-Headers":
     "Origin, X-Requested-With, Content-Type, Accept",
 };
-
-export const SEARCH_SINGLETON_ROOM_ID = "api";
 
 type Episode = {
   id: string;
@@ -20,7 +20,7 @@ type Episode = {
 
 type Found = Omit<Episode, "description"> & { score: number };
 
-export async function getEpisodes(): Promise<Episode[]> {
+async function getEpisodes(): Promise<Episode[]> {
   return await fetch("https://www.braggoscope.com/episodes.json").then((res) =>
     res.json()
   );
@@ -38,8 +38,12 @@ export default class SearchServer implements Party.Server {
 
     if (message.type === "init") {
       // Minimal security! Only allow the admin key to trigger a rebuild
-      if (message.adminKey !== this.party.env.BRAGGOSCOPE_SEARCH_ADMIN_KEY)
+      if (message.adminKey !== this.party.env.BRAGGOSCOPE_SEARCH_ADMIN_KEY) {
+        this.party.broadcast(
+          JSON.stringify({ type: "error", error: "Unauthorized" })
+        );
         return;
+      }
       await this.buildIndex();
     }
   }
@@ -58,11 +62,16 @@ export default class SearchServer implements Party.Server {
     const episodes = await getEpisodes();
     this.broadcastProgress(0, episodes.length);
 
-    const PAGE_SIZE = 20;
+    const PAGE_SIZE = 5; // higher is faster, but can hit rate limits
 
     for (let i = 0; i < episodes.length; i += PAGE_SIZE) {
-      await this.index(episodes.slice(i, i + PAGE_SIZE));
-      this.broadcastProgress(i, episodes.length);
+      try {
+        await this.index(episodes.slice(i, i + PAGE_SIZE));
+        this.broadcastProgress(i, episodes.length);
+      } catch (err) {
+        console.error(err);
+        this.party.broadcast(JSON.stringify({ type: "error", error: err }));
+      }
     }
 
     this.party.broadcast(
@@ -112,10 +121,7 @@ export default class SearchServer implements Party.Server {
     }));
 
     // Upsert the embeddings into the database
-    const result = await this.party.context.vectorize.searchIndex.upsert(
-      vectors
-    );
-    console.log(result);
+    await this.party.context.vectorize.searchIndex.upsert(vectors);
   }
 
   async search(query: string) {
