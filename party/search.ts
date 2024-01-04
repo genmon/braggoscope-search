@@ -10,7 +10,17 @@ const CORS = {
 
 export const SEARCH_SINGLETON_ROOM_ID = "api";
 
-export async function getEpisodes() {
+type Episode = {
+  id: string;
+  title: string;
+  published: string;
+  permalink: string;
+  description: string;
+};
+
+type Found = Omit<Episode, "description"> & { score: number };
+
+export async function getEpisodes(): Promise<Episode[]> {
   return await fetch("https://www.braggoscope.com/episodes.json").then((res) =>
     res.json()
   );
@@ -51,8 +61,7 @@ export default class SearchServer implements Party.Server {
     const PAGE_SIZE = 20;
 
     for (let i = 0; i < episodes.length; i += PAGE_SIZE) {
-      const page = episodes.slice(i, i + PAGE_SIZE);
-      await this.upsert(page);
+      await this.index(episodes.slice(i, i + PAGE_SIZE));
       this.broadcastProgress(i, episodes.length);
     }
 
@@ -70,8 +79,8 @@ export default class SearchServer implements Party.Server {
 
     if (req.method === "POST") {
       const { query } = (await req.json()) as any;
-      const episodes = await this.search(query);
-      return Response.json({ episodes }, { status: 200, headers: CORS });
+      const found = await this.search(query);
+      return Response.json({ episodes: found }, { status: 200, headers: CORS });
     }
 
     // respond to cors preflight requests
@@ -82,16 +91,19 @@ export default class SearchServer implements Party.Server {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  async upsert(episodes: any[]) {
+  async index(episodes: Episode[]) {
     // Get embeddings for episodes
-    const { data } = await this.ai.run("@cf/baai/bge-base-en-v1.5", {
-      text: episodes.map((episode: any) => episode.description),
-    });
+    const { data: embeddings } = await this.ai.run(
+      "@cf/baai/bge-base-en-v1.5",
+      {
+        text: episodes.map((episode) => episode.description),
+      }
+    );
 
     // Vectorize uses vector objects. Combine the episodes list with the embeddings
-    const vectors = episodes.map((episode: any, i: number) => ({
+    const vectors = episodes.map((episode, i) => ({
       id: episode.id,
-      values: data[i],
+      values: embeddings[i],
       metadata: {
         title: episode.title,
         published: episode.published,
@@ -100,22 +112,21 @@ export default class SearchServer implements Party.Server {
     }));
 
     // Upsert the embeddings into the database
-    const result = await this.party.context.vectorize.searchIndex.upsert(
-      vectors
-    );
+    await this.party.context.vectorize.searchIndex.upsert(vectors);
   }
 
   async search(query: string) {
     // Get the embedding for the query
-    const { data } = await this.ai.run("@cf/baai/bge-base-en-v1.5", {
-      text: [query],
-    });
-
-    const queryVector = data[0];
+    const { data: embeddings } = await this.ai.run(
+      "@cf/baai/bge-base-en-v1.5",
+      {
+        text: [query],
+      }
+    );
 
     // Search the index for the query vector
     const nearest: any = await this.party.context.vectorize.searchIndex.query(
-      queryVector,
+      embeddings[0],
       {
         topK: 15,
         returnValues: false,
@@ -123,23 +134,13 @@ export default class SearchServer implements Party.Server {
       }
     );
 
-    const found: {
-      id: string;
-      title: string;
-      published: string;
-      permalink: string;
-      score: number;
-    }[] = [];
+    // Convert to a form useful to the client
+    const found: Found[] = nearest.matches.map((match: any) => ({
+      id: match.vectorId,
+      ...match.vector.metadata,
+      score: match.score,
+    }));
 
-    for (const match of nearest.matches) {
-      found.push({
-        id: match.vectorId,
-        ...match.vector.metadata,
-        score: match.score,
-      });
-    }
-
-    // Return maximum 15 results
-    return found.slice(0, 15);
+    return found;
   }
 }
