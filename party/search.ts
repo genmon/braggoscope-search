@@ -29,8 +29,8 @@ async function getEpisodes(): Promise<Episode[]> {
 export default class SearchServer implements Party.Server {
   ai: Ai;
 
-  constructor(public party: Party.Room) {
-    this.ai = new Ai(party.ai);
+  constructor(public room: Party.Room) {
+    this.ai = new Ai(room.ai);
   }
 
   async onMessage(msg: string, connection: Party.Connection) {
@@ -38,8 +38,8 @@ export default class SearchServer implements Party.Server {
 
     if (message.type === "init") {
       // Minimal security! Only allow the admin key to trigger a rebuild
-      if (message.adminKey !== this.party.env.BRAGGOSCOPE_SEARCH_ADMIN_KEY) {
-        this.party.broadcast(
+      if (message.adminKey !== this.room.env.BRAGGOSCOPE_SEARCH_ADMIN_KEY) {
+        this.room.broadcast(
           JSON.stringify({ type: "error", error: "Unauthorized" })
         );
         return;
@@ -50,7 +50,7 @@ export default class SearchServer implements Party.Server {
 
   broadcastProgress(current: number, target: number) {
     console.log(`Progress: ${current} / ${target}`);
-    this.party.broadcast(
+    this.room.broadcast(
       JSON.stringify({
         type: "progress",
         target: target,
@@ -71,7 +71,7 @@ export default class SearchServer implements Party.Server {
         this.broadcastProgress(i, episodes.length);
       } catch (err) {
         console.error(err);
-        this.party.broadcast(
+        this.room.broadcast(
           JSON.stringify({
             type: "error",
             error: (err as Error).message || err,
@@ -81,7 +81,7 @@ export default class SearchServer implements Party.Server {
       }
     }
 
-    this.party.broadcast(
+    this.room.broadcast(
       JSON.stringify({
         type: "done",
       })
@@ -89,7 +89,7 @@ export default class SearchServer implements Party.Server {
   }
 
   async onRequest(req: Party.Request) {
-    if (this.party.id !== SEARCH_SINGLETON_ROOM_ID) {
+    if (this.room.id !== SEARCH_SINGLETON_ROOM_ID) {
       return new Response("Not Found", { status: 404 });
     }
 
@@ -128,7 +128,7 @@ export default class SearchServer implements Party.Server {
     }));
 
     // Upsert the embeddings into the database
-    await this.party.context.vectorize.searchIndex.upsert(vectors);
+    await this.room.context.vectorize.searchIndex.upsert(vectors);
   }
 
   async search(query: string) {
@@ -141,7 +141,7 @@ export default class SearchServer implements Party.Server {
     );
 
     // Search the index for the query vector
-    const nearest: any = await this.party.context.vectorize.searchIndex.query(
+    const nearest: any = await this.room.context.vectorize.searchIndex.query(
       embeddings[0],
       {
         topK: 15,
