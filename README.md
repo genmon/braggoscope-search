@@ -10,7 +10,7 @@ A search engine for braggoscope.com, which is a static site.
 - Indexing: it reads a JSON file of documents provided by braggoscope.com
 - Querying: it accepts a query over POST and returns a list of documents
 
-The vector database is Vectorize from Cloudflare. The embedding model is suppled by Cloudflare Workers AI. Both the vector db and the embedding model are accessed via PartyKit.
+The vector database is Vectorize from Cloudflare. The embedding model is part of Cloudflare Workers AI. Both the vector db and the embedding model are accessed via PartyKit.
 
 This server also includes:
 
@@ -141,4 +141,4 @@ After indexing, use the test UI and the search API to test the search again.
 
 View source at [www.braggoscope.com](https://www.braggoscope.com) to see how the search is integrated into the site. It's a simple form that makes a POST request to the search API, and displays the results.
 
-The process to re-index to run whenever the site is updated.
+There is also a process to trigger re-indexing whenever that site is updated.
