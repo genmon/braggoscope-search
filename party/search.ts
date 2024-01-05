@@ -30,7 +30,7 @@ export default class SearchServer implements Party.Server {
   ai: Ai;
 
   constructor(public room: Party.Room) {
-    this.ai = new Ai(room.ai);
+    this.ai = new Ai(room.context.ai);
   }
 
   async onMessage(msg: string, connection: Party.Connection) {
