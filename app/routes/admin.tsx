@@ -1,6 +1,6 @@
 import { useLoaderData } from "@remix-run/react";
 import { useState } from "react";
-import type { MetaFunction } from "partymix";
+import type { LoaderFunctionArgs, MetaFunction } from "partymix";
 import usePartySocket from "partysocket/react";
 import { SEARCH_SINGLETON_ROOM_ID } from "party/search";
 import CreateIndexButton from "~/components/create-index-button";
@@ -8,7 +8,7 @@ import CreateIndexButton from "~/components/create-index-button";
 // PartyKit will inject the host into the server bundle
 // so let's read it here and expose it to the client
 declare const PARTYKIT_HOST: string;
-export function loader({ request }) {
+export function loader({ request }: LoaderFunctionArgs) {
   // parse the search params for `?q=`
   const url = new URL(request.url);
   const adminKey = url.searchParams.get("key");

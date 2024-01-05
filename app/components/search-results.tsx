@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import PartySocket from "partysocket";
+
+import { suspend } from "suspend-react";
 
 type Episode = {
   id: string;
@@ -14,34 +16,25 @@ export default function SearchResults(props: {
   room: string;
   query: string;
 }) {
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [loading, setLoading] = useState(true);
+  const episodes = suspend(async () => {
+    const res = await PartySocket.fetch(
+      {
+        host: props.partykitHost,
+        party: props.party,
+        room: props.room,
+      },
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: props.query }),
+      }
+    );
 
-  useEffect(() => {
-    setLoading(true);
-    const fetchResults = async () => {
-      const res = await fetch(
-        `//${props.partykitHost}/parties/${props.party}/${props.room}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ query: props.query }),
-        }
-      );
-
-      const { episodes } = await res.json();
-      setEpisodes(episodes);
-      setLoading(false);
-    };
-
-    fetchResults().catch(console.error);
+    const { episodes } = await res.json();
+    return episodes as Episode[];
   }, [props.query]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   if (!episodes.length) {
     return null;

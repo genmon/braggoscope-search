@@ -29,9 +29,9 @@ This server also includes:
 
 ## Usage
 
-These instructions assume you have cloned the repo, installed packaged, and signed into PartyKit (required for using certain features):
+These instructions assume you have cloned the repo, installed packages, and signed into PartyKit (required for using certain features):
 
-```
+```bash
 npm install
 npx partykit login
 ```
@@ -44,17 +44,20 @@ Vectorize is a Cloudflare-hosted vector database. We'll use one managed by Party
 
 Create the vector index:
 
-```
-npx partykit vectorize create braggoscope-search --dimensions 768 --metric cosine
+```bash
+npx partykit vectorize create braggoscope-index --preset @cf/baai/bge-base-en-v1.5
 ```
 
 This is made available in the PartyKit server with these lines in `partykit.json`:
 
-```
+```jsonc
+{
+  // ...
   "vectorize": {
-    "searchIndex": "braggoscope-search"
+    "searchIndex": "braggoscope-index"
   },
   "ai": true
+}
 ```
 
 Note the `"ai": true` which also makes Cloudflare's Workers AI available in the PartyKit server.
@@ -69,16 +72,16 @@ Have a look at episodes.json here: [www.braggoscope.com/episodes.json](https://w
 
 This document looks like:
 
-```
+```jsonc
 [
   {
-    "id":"p0038x9h",
-    "title":"The Speed of Light",
-    "published":"2006-11-30",
-    "permalink":"/2006/11/30/the-speed-of-light.html",
-    "description":"Melvyn Bragg and guests discuss the speed of light. Scientists and thinkers ..."
-  },
-  ...
+    "id": "p0038x9h",
+    "title": "The Speed of Light",
+    "published": "2006-11-30",
+    "permalink": "/2006/11/30/the-speed-of-light.html",
+    "description": "Melvyn Bragg and guests discuss the speed of light. Scientists and thinkers ..."
+  }
+  // ...
 ]
 ```
 
@@ -86,7 +89,7 @@ We want to create a vector embedding of the description, and store it against th
 
 We have to kick off indexing manually, so we have some minimal security around it. We'll use an admin key to protect the endpoint. Store this in `.env`:
 
-```
+```bash
 echo "BRAGGOSCOPE_SEARCH_ADMIN_KEY=foo-admin-key\n" > .env
 ```
 
@@ -108,7 +111,7 @@ Try the query "greek myths" and you should see a list of episodes related to the
 
 The search feature on braggoscope.com makes a POST request to the search API. You can test this with curl:
 
-```
+```bash
 curl \
 --json '{"query": "greek myths"}' \
 http://127.0.0.1:1999/parties/search/api
@@ -120,15 +123,15 @@ You will see a JSON object of results being returned.
 
 Deploy the server to a public URL:
 
-```
-npm partykit deploy
+```bash
+npm run deploy
 ```
 
 Note: do not use the usual `npx partykit deploy`! The `deploy` script we're using here also (1) ensures that the site is built first; and (2) sets the environment variables from `.env`.
 
 Wait for the deploy to complete (you may have to wait a couple extra minutes for the domain to be provisioned) then build the index again:
 
-Visit `https://braggoscope-search.YOUR-PARTYKIT-USERNAME.partykit.dev/admin?key=foo-admin-key`
+Visit [https://braggoscope-search.YOUR-PARTYKIT-USERNAME.partykit.dev/admin?key=foo-admin-key](https://braggoscope-search.YOUR-PARTYKIT-USERNAME.partykit.dev/admin?key=foo-admin-key)
 
 (Replace `YOUR-PARTYKIT-USERNAME` with your PartyKit username, and `foo-admin-key` with the admin key you set in `.env`.)
 

@@ -49,6 +49,7 @@ export default class SearchServer implements Party.Server {
   }
 
   broadcastProgress(current: number, target: number) {
+    console.log(`Progress: ${current} / ${target}`);
     this.party.broadcast(
       JSON.stringify({
         type: "progress",
@@ -70,7 +71,13 @@ export default class SearchServer implements Party.Server {
         this.broadcastProgress(i, episodes.length);
       } catch (err) {
         console.error(err);
-        this.party.broadcast(JSON.stringify({ type: "error", error: err }));
+        this.party.broadcast(
+          JSON.stringify({
+            type: "error",
+            error: (err as Error).message || err,
+          })
+        );
+        throw err;
       }
     }
 

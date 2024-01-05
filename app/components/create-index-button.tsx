@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 export default function CreateIndexButton(props: {
   isDone: boolean;
   progress: number;
