@@ -11,7 +11,6 @@ type Episode = {
 };
 
 export default function SearchResults(props: {
-  partykitHost: string;
   party: string;
   room: string;
   query: string;
@@ -19,7 +18,7 @@ export default function SearchResults(props: {
   const episodes = suspend(async () => {
     const res = await PartySocket.fetch(
       {
-        host: props.partykitHost,
+        host: window.location.host,
         party: props.party,
         room: props.room,
       },
@@ -31,6 +30,10 @@ export default function SearchResults(props: {
         body: JSON.stringify({ query: props.query }),
       }
     );
+
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
 
     const { episodes } = await res.json();
     return episodes as Episode[];

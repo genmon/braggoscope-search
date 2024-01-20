@@ -2,18 +2,15 @@ import { useLoaderData } from "@remix-run/react";
 import { useState } from "react";
 import type { LoaderFunctionArgs, MetaFunction } from "partymix";
 import usePartySocket from "partysocket/react";
-import { SEARCH_SINGLETON_ROOM_ID } from "party/search";
 import CreateIndexButton from "~/components/create-index-button";
+import { SEARCH_PARTY_NAME, SEARCH_SINGLETON_ROOM_ID } from "~/utils";
 
-// PartyKit will inject the host into the server bundle
-// so let's read it here and expose it to the client
-declare const PARTYKIT_HOST: string;
 export function loader({ request }: LoaderFunctionArgs) {
   // parse the search params for `?q=`
   const url = new URL(request.url);
   const adminKey = url.searchParams.get("key");
 
-  return { partykitHost: PARTYKIT_HOST, adminKey };
+  return { adminKey };
 }
 
 export const meta: MetaFunction = () => {
@@ -24,15 +21,15 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Admin() {
-  const { partykitHost, adminKey } = useLoaderData<typeof loader>();
+  const { adminKey } = useLoaderData<typeof loader>();
   const [isDone, setIsDone] = useState(true);
   const [progress, setProgress] = useState(-1);
   const [target, setTarget] = useState(-1);
   const [error, setError] = useState<string | null>(null);
 
   const socket = usePartySocket({
-    host: partykitHost,
-    party: "search",
+    host: window.location.host,
+    party: SEARCH_PARTY_NAME,
     room: SEARCH_SINGLETON_ROOM_ID,
     onMessage: (event) => {
       const message = JSON.parse(event.data);

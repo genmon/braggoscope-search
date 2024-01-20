@@ -1,7 +1,6 @@
 import type * as Party from "partykit/server";
 import { Ai } from "partykit-ai";
-
-export const SEARCH_SINGLETON_ROOM_ID = "api";
+import { SEARCH_SINGLETON_ROOM_ID } from "~/utils";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",

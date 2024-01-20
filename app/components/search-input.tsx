@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 export default function SearchInput(props: {
-  handleSearch: (query: string) => void;
+  onQuery: (query: string) => void;
 }) {
   const [query, setQuery] = useState("");
 
@@ -9,7 +9,7 @@ export default function SearchInput(props: {
     event.preventDefault();
     // blur the form
     event.currentTarget.querySelector("input")?.blur();
-    props.handleSearch(query);
+    props.onQuery(query);
   };
 
   return (
