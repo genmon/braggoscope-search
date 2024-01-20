@@ -12,26 +12,26 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx ."
   },
   "dependencies": {
-    "@remix-run/css-bundle": "^2.4.1",
-    "@remix-run/react": "^2.4.1",
-    "isbot": "^4.3.0",
-    "partykit-ai": "^0.0.8",
-    "partymix": "^0.0.11",
-    "partysocket": "0.0.20",
+    "@remix-run/css-bundle": "^2.5.1",
+    "@remix-run/react": "^2.5.1",
+    "isbot": "^4.4.0",
+    "partykit-ai": "^0.0.9",
+    "partymix": "^0.0.12",
+    "partysocket": "0.0.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "suspend-react": "^0.1.3"
   },
   "devDependencies": {
-    "@remix-run/dev": "^2.4.1",
-    "@remix-run/eslint-config": "^2.4.1",
-    "@types/react": "^18.2.46",
+    "@remix-run/dev": "^2.5.1",
+    "@remix-run/eslint-config": "^2.5.1",
+    "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "concurrently": "^8.2.2",
     "eslint": "^8.56.0",
-    "partykit": "^0.0.66",
+    "partykit": "^0.0.73",
     "rimraf": "^5.0.5",
-    "tailwindcss": "^3.4.0",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"
   },
   "engines": {
