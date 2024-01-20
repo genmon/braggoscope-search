@@ -67,7 +67,10 @@ export default class SearchServer implements Party.Server {
 
     for (let i = 0; i < episodes.length; i += PAGE_SIZE) {
       try {
-        await this.index(episodes.slice(i, i + PAGE_SIZE));
+        await retry(async () => {
+          await this.index(episodes.slice(i, i + PAGE_SIZE));
+        });
+
         this.broadcastProgress(i, episodes.length);
       } catch (err) {
         console.error(err);
@@ -158,5 +161,18 @@ export default class SearchServer implements Party.Server {
     }));
 
     return found;
+  }
+}
+
+// API calls be a bit flaky. Here's a helper to retry them a few times
+async function retry(fn: () => Promise<any>, retries: number = 5) {
+  try {
+    return await fn();
+  } catch (err) {
+    if (retries > 0) {
+      console.log("Retrying...");
+      return await retry(fn, retries - 1);
+    }
+    throw err;
   }
 }
