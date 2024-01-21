@@ -164,7 +164,7 @@ export default class SearchServer implements Party.Server {
 }
 
 // API calls be a bit flaky. Here's a helper to retry them a few times
-async function retry(fn: () => Promise<any>, retries: number = 5) {
+async function retry<T>(fn: () => Promise<T>, retries: number = 5): Promise<T> {
   try {
     return await fn();
   } catch (err) {
