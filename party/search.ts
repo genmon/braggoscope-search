@@ -2,6 +2,8 @@ import type * as Party from "partykit/server";
 import { Ai } from "partykit-ai";
 import { SEARCH_SINGLETON_ROOM_ID } from "~/utils";
 
+import type { VectorizeMatches } from "@cloudflare/workers-types";
+
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST",
@@ -143,21 +145,21 @@ export default class SearchServer implements Party.Server {
     );
 
     // Search the index for the query vector
-    const nearest: any = await this.room.context.vectorize.searchIndex.query(
-      embeddings[0],
-      {
+    const nearest: VectorizeMatches =
+      await this.room.context.vectorize.searchIndex.query(embeddings[0], {
         topK: 15,
         returnValues: false,
         returnMetadata: true,
-      }
-    );
+      });
 
     // Convert to a form useful to the client
-    const found: Found[] = nearest.matches.map((match: any) => ({
-      id: match.vectorId,
-      ...match.vector.metadata,
-      score: match.score,
-    }));
+    const found: Found[] = nearest.matches.map((match) => {
+      return {
+        id: match.id,
+        ...match.metadata,
+        score: match.score,
+      } as Found;
+    });
 
     return found;
   }
